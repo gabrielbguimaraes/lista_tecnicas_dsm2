@@ -1,5 +1,5 @@
 import { Component } from "react";
-import Cliente from "../../../../atv1/src/modelo/cliente"; // Assegure-se de que está importando corretamente
+import Cliente from "../modelo/cliente";
 
 type Props = {
     clientes: Cliente[];

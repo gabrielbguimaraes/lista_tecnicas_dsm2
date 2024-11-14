@@ -1,5 +1,5 @@
 import { Component } from "react";
-import Produto from "../modelo/produto"; // Certifique-se de que o caminho esteja correto
+import Produto from "../modelo/produto";
 
 type Props = {
     produtos: Produto[];
@@ -15,7 +15,7 @@ export default class ListaProdutos extends Component<Props> {
                 <div className="list-group">
                     {produtos.map(produto => (
                         <a href="#" className="list-group-item list-group-item-action" key={produto.nome}>
-                            Nome: {produto.nome}, Preço: R$ {produto.preco.toFixed(2)} // Apresenta o preço formatado
+                            Nome: {produto.nome}, Preço: R$ {produto.preco.toFixed(2)}
                         </a>
                     ))}
                 </div>

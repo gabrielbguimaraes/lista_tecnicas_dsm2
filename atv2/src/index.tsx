@@ -1,21 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
-import reportWebVitals from './reportWebVitals';
-import Roteador from './componentes/roteador';
-import Cliente from '../../../atv1/src/modelo/cliente';
-import Pet from '../../../atv1/src/modelo/pet';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './componentes/App'
 
-const clientes: Cliente[] = [];
-const pets: Pet[] = [];
-
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
+ReactDOM.render(
   <React.StrictMode>
-    <Roteador clientes={clientes} pets={pets} />
-  </React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
 );
-
-reportWebVitals();

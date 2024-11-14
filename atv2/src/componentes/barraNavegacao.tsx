@@ -1,33 +1,32 @@
-import { Component } from "react";
+import React, { Component } from "react";
+import { Navbar, Nav, Container } from 'react-bootstrap';
 
 type Props = {
-    selectorView: (newView: string, event: Event) => void;
+    onClickBotao: (novaTela: string, evento: React.MouseEvent<any>) => void;
     tema: string;
     botoes: string[];
-}
-
-export default class BarraNavegacao extends Component<Props> {
+  };
+  
+  export default class BarraNavegacao extends Component<Props> {
     render() {
-        const { tema, botoes } = this.props;
-
-        return (
-            <nav className="navbar navbar-expand-lg" style={{ backgroundColor: tema, marginBottom: 10 }}>
-                <div className="container-fluid">
-                    <span className="navbar-brand mb-0 h1">PetLovers</span>
-                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
-                    <div className="collapse navbar-collapse" id="navbarNav">
-                        <ul className="navbar-nav">
-                            {botoes.map(botao => (
-                                <li key={botao} className="nav-item">
-                                    <a className="nav-link" href="#" onClick={(e) => this.props.selectorView(botao, e)}>{botao}</a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-        );
+      const { tema, botoes, onClickBotao } = this.props;
+  
+      return (
+        <Navbar bg={tema} expand="lg" fixed="top">
+          <Container>
+            <Navbar.Brand href="#home">PetShop</Navbar.Brand>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="me-auto">
+                {botoes.map(botao => (
+                  <Nav.Link key={botao} href="#" onClick={(e) => onClickBotao(botao, e)}>
+                    {botao}
+                  </Nav.Link>
+                ))}
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
+      );
     }
-}
+  }

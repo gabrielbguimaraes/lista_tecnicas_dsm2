@@ -1,5 +1,5 @@
 import { Component } from "react";
-import Pet from "../../../../atv1/src/modelo/pet";
+import Pet from "../modelo/pet";
 
 type Props = {
     pets: Pet[];
