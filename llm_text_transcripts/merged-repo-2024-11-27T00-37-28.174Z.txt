@@ -1,0 +1,2193 @@
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\APP\MAIN.TS CODE IS BELOW
+import Entrada from "../io/entrada";
+import Empresa from "../modelo/empresa";
+import CadastroCliente from "../negocio/cadastroCliente";
+import ListagemClientes from "../negocio/listagemClientes";
+import CadastroPet from "../negocio/cadastroPet";
+import ListagemPets from "../negocio/ListagemPets";
+import ListagemProdutos from "../negocio/listagemProdutos";
+import CadastroProduto from "../negocio/cadastroProduto";
+import RegistroConsumo from "../negocio/registroConsumo"
+import ListagemConsumo from "../negocio/listagemConsumo";
+
+
+console.log(`Bem-vindo ao melhor sistema de gerenciamento de pet shops e clínicas veterinarias`)
+let empresa = new Empresa()
+let execucao = true
+
+while (execucao) {
+    console.log(`Opções:`);
+    console.log(`1 - Cadastrar Cliente`);
+    console.log(`2 - Listar Todos os Clientes`);
+    console.log(`3 - Cadastrar Pet`); 
+    console.log(`4 - Listar Todos os Pets`); 
+    console.log(`5 - Cadastrar Produto`);
+    console.log(`6 - Listar Todos os Produtos`);
+    console.log(`7 - Registrar Consumo`);
+    console.log(`8 - Listar Top 10 Clientes`); 
+    console.log(`9 - Listar Produtos Mais Consumidos`); 
+    console.log(`10 - Listar Serviços Mais Consumidos`); 
+    console.log(`11 - Listar Clientes que Mais Gastaram`);
+    console.log(`0 - Sair`);
+
+    let entrada = new Entrada();
+    let opcao = entrada.receberNumero(`Por favor, escolha uma opção: `);
+
+    switch (opcao) {
+        case 1:
+            let cadastroCliente = new CadastroCliente(empresa.getClientes);
+            cadastroCliente.cadastrar();
+            break;
+        case 2:
+            let listagemClientes = new ListagemClientes(empresa.getClientes);
+            listagemClientes.listar();
+            break;
+        case 3:
+            let cadastroPet = new CadastroPet(empresa.getPets);
+            cadastroPet.cadastrar();
+            break;
+        case 4:
+            let listagemPets = new ListagemPets(empresa.getPets);
+            listagemPets.listar();
+            break;
+        case 5:
+            let cadastroProduto = new CadastroProduto(empresa.getProdutos);
+            cadastroProduto.cadastrar();
+            break;
+        case 6:
+            let listagemProdutos = new ListagemProdutos(empresa.getProdutos);
+            listagemProdutos.listar();
+            break;
+        case 7:
+            let nomeCliente = entrada.receberTexto(`Informe o nome do cliente para registrar o consumo: `);
+            let cliente = empresa.getClientes.find(c => c.nome === nomeCliente);
+            if (cliente) {
+                let tipoConsumo = entrada.receberNumero(`O que você gostaria de registrar?\n1 - Produto\n2 - Serviço\nEscolha uma opção: `);
+                if (tipoConsumo === 1) {
+                    let nomeProduto = entrada.receberTexto(`Informe o nome do produto consumido: `);
+                    let produto = empresa.getProdutos.find(p => p.nome === nomeProduto);
+                    if (produto) {
+                        const registroConsumo = new RegistroConsumo(cliente);
+                        registroConsumo.registrarProduto(produto);
+                    } else {
+                        console.log(`Produto não encontrado.`);
+                    }
+                } else if (tipoConsumo === 2) {
+                    let nomeServico = entrada.receberTexto(`Informe o nome do serviço consumido: `);
+                    let servico = empresa.getServicos.find(s => s.nome === nomeServico);
+                    if (servico) {
+                        const registroConsumo = new RegistroConsumo(cliente);
+                        registroConsumo.registrarServico(servico);
+                    } else {
+                        console.log(`Serviço não encontrado.`);
+                    }
+                } else {
+                    console.log(`Opção de consumo não reconhecida.`);
+                }
+            } else {
+                console.log(`Cliente não encontrado.`);
+            }
+            break;
+        case 8:
+            let listarTop10 = new ListagemClientes(empresa.getClientes);
+            listarTop10.listarTop10Clientes();
+            break;
+        case 9:
+            let listagemConsumoProdutos = new ListagemConsumo(empresa.getClientes, empresa.getProdutos, empresa.getServicos);
+            listagemConsumoProdutos.listarProdutosMaisConsumidos();
+            break;
+        
+        case 10:
+            let listagemConsumoServicos = new ListagemConsumo(empresa.getClientes, empresa.getProdutos, empresa.getServicos);
+            listagemConsumoServicos.listarServicosMaisConsumidos();
+            break;
+        case 11:
+        let listagemValorGasto = new ListagemClientes(empresa.getClientes);
+        listagemValorGasto.listarTop5ClientesPorValor();
+            break;
+        case 0:
+            execucao = false;
+            console.log(`Até mais`);
+            break;
+        default:
+            console.log(`Operação não entendida :(`);
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\IO\ENTRADA.TS CODE IS BELOW
+import promptSync from "prompt-sync";
+export default class Entrada {
+    public receberNumero(mensagem: string): number {
+        let prompt = promptSync();
+        let valor = prompt(mensagem)
+        let numero  = new Number(valor)
+        return numero.valueOf()
+    }
+    public receberTexto(mensagem: string): string {
+        let prompt = promptSync();
+        let texto = prompt(mensagem)
+        return texto
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\CLIENTE.JS CODE IS BELOW
+var Cliente = /** @class */ (function () {
+    function Cliente(nome, nomeSocial, cpf) {
+        this.nome = nome;
+        this.nomeSocial = nomeSocial;
+        this.cpf = cpf;
+        this.rgs = [];
+        this.dataCadastro = new Date();
+        this.telefones = [];
+        this.produtosConsumidos = [];
+        this.servicosConsumidos = [];
+        this.pets = [];
+    }
+    Object.defineProperty(Cliente.prototype, "getCpf", {
+        get: function () {
+            return this.cpf;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getRgs", {
+        get: function () {
+            return this.rgs;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getDataCadastro", {
+        get: function () {
+            return this.dataCadastro;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getTelefones", {
+        get: function () {
+            return this.telefones;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getProdutosConsumidos", {
+        get: function () {
+            return this.produtosConsumidos;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getServicosConsumidos", {
+        get: function () {
+            return this.servicosConsumidos;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getPets", {
+        get: function () {
+            return this.pets;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Cliente;
+}());
+export default Cliente;
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\CLIENTE.TS CODE IS BELOW
+import CPF from "./cpf"
+import Pet from "./pet"
+import Produto from "./produto"
+import RG from "./rg"
+import Servico from "./servico"
+import Telefone from "./telefone"
+
+export default class Cliente {
+    public nome: string
+    public nomeSocial: string
+    private cpf: CPF
+    private rgs: Array<RG>
+    private dataCadastro: Date
+    private telefones: Array<Telefone>
+    private produtosConsumidos: Array<Produto>
+    private servicosConsumidos: Array<Servico>
+    private pets: Array<Pet>
+    constructor(nome: string, nomeSocial: string, cpf: CPF) {
+        this.nome = nome
+        this.nomeSocial = nomeSocial
+        this.cpf = cpf
+        this.rgs = []
+        this.dataCadastro = new Date()
+        this.telefones = []
+        this.produtosConsumidos = []
+        this.servicosConsumidos = []
+        this.pets = []
+    }
+    public get getCpf(): CPF {
+        return this.cpf
+    }
+    public get getRgs(): Array<RG> {
+        return this.rgs
+    }
+    public get getDataCadastro(): Date {
+        return this.dataCadastro
+    }
+    public get getTelefones(): Array<Telefone> {
+        return this.telefones
+    }
+    public get getProdutosConsumidos(): Array<Produto> {
+        return this.produtosConsumidos
+    }
+    public get getServicosConsumidos(): Array<Servico> {
+        return this.servicosConsumidos
+    }
+    public get getPets(): Array<Pet>{
+        return this.pets
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\CPF.JS CODE IS BELOW
+var CPF = /** @class */ (function () {
+    function CPF(valor, dataEmissao) {
+        this.valor = valor;
+        this.dataEmissao = dataEmissao;
+    }
+    Object.defineProperty(CPF.prototype, "getValor", {
+        get: function () {
+            return this.valor;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(CPF.prototype, "getDataEmissao", {
+        get: function () {
+            return this.dataEmissao;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return CPF;
+}());
+export default CPF;
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\CPF.TS CODE IS BELOW
+export default class CPF {
+    private valor: string
+    private dataEmissao: Date
+    constructor(valor: string, dataEmissao: Date) {
+        this.valor = valor
+        this.dataEmissao = dataEmissao
+    }
+    public get getValor(): string {
+        return this.valor
+    }
+    public get getDataEmissao(): Date {
+        return this.dataEmissao
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\EMPRESA.TS CODE IS BELOW
+import Cliente from "./cliente";
+import Produto from "./produto";
+import Servico from "./servico";
+import Pet from "./pet";
+
+export default class Empresa {
+    private clientes: Array<Cliente>;
+    private produtos: Array<Produto>;
+    private servicos: Array<Servico>;
+    private pets: Array<Pet>;
+
+    constructor() {
+        this.clientes = [];
+        this.produtos = [];
+        this.servicos = [];
+        this.pets = [];
+    }
+
+    public get getClientes() {
+        return this.clientes;
+    }
+
+    public get getProdutos() {
+        return this.produtos;
+    }
+
+    public get getServicos() {
+        return this.servicos;
+    }
+
+    public get getPets() {
+        return this.pets;
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\PET.TS CODE IS BELOW
+export default class Pet {
+    public nome: string
+    public tipo: string
+    public raca: string
+    public genero: string
+
+    constructor(nome: string, raca: string, genero: string, tipo: string) {
+        this.nome = nome
+        this.raca = raca
+        this.genero = genero
+        this.tipo = tipo
+    }
+
+    public get getNome(){return this.nome}
+    public get getRaca(){return this.raca}
+    public get getGenero(){return this.genero}
+    public get getTipo(){return this.tipo}
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\PRODUTO.TS CODE IS BELOW
+export default class Produto {
+    public nome: string;
+    public preco: number;
+    public consumoCount: number;
+
+    constructor(nome: string, preco: number) {
+        this.nome = nome;
+        this.preco = preco;
+        this.consumoCount = 0; 
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\RG.TS CODE IS BELOW
+export default class RG {
+    private valor: string
+    private dataEmissao: Date
+    constructor(valor: string, dataEmissao: Date) {
+        this.valor = valor
+        this.dataEmissao = dataEmissao
+    }
+    public get getValor(): string {
+        return this.valor
+    }
+    public get getDataEmissao(): Date {
+        return this.dataEmissao
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\SERVICO.TS CODE IS BELOW
+export default class Servico {
+    public nome: string;
+    public preco: number;
+    public consumoCount: number;
+
+    constructor(nome: string, preco: number) {
+        this.nome = nome;
+        this.preco = preco;
+        this.consumoCount = 0;
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\MODELO\TELEFONE.TS CODE IS BELOW
+export default class Telefone {
+    private ddd: string
+    private numero: string
+    constructor(ddd: string, numero: string) {
+        this.ddd = ddd
+        this.numero = numero
+    }
+
+    public get getDdd(): string {
+        return this.ddd
+    }
+
+    public get getNumero(): string {
+        return this.numero
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\CADASTRO.TS CODE IS BELOW
+export default abstract class Cadastro {
+    public abstract cadastrar(): void
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\CADASTROCLIENTE.TS CODE IS BELOW
+import Entrada from "../io/entrada";
+import Cliente from "../modelo/cliente";
+import CPF from "../modelo/cpf";
+import Cadastro from "./cadastro";
+
+export default class CadastroCliente extends Cadastro {
+    private clientes: Array<Cliente>;
+    private entrada: Entrada;
+
+    constructor(clientes: Array<Cliente>) {
+        super();
+        this.clientes = clientes;
+        this.entrada = new Entrada();
+    }
+
+    public cadastrar(): void {
+        console.log(`\nInício do cadastro do cliente`);
+
+        let nome = this.entrada.receberTexto(`Por favor informe o nome do cliente: `);
+        let nomeSocial = this.entrada.receberTexto(`Por favor informe o nome social do cliente: `);
+        let valor = this.receberCpf();
+        let dataEmissao = this.receberData();
+
+        const cpf = new CPF(valor, dataEmissao);
+        const cliente = new Cliente(nome, nomeSocial, cpf);
+        this.clientes.push(cliente);
+        console.log(`\nCadastro concluído :)\n`);
+    }
+
+    private receberCpf(): string {
+        let valor: string;
+        while (true) {
+            valor = this.entrada.receberTexto(`Por favor informe o número do CPF: `);
+            if (this.validarCPF(valor)) {
+                return valor;
+            } else {
+                console.error("Informe um CPF válido.");
+            }
+        }
+    }
+
+    private receberData(): Date {
+        let data: string;
+        while (true) {
+            data = this.entrada.receberTexto(`Por favor informe a data de emissão do CPF, no padrão dd/mm/yyyy: `);
+            let partesData = data.split('/');
+            if (partesData.length === 3) {
+                let dia = Number(partesData[0]);
+                let mes = Number(partesData[1]) - 1;
+                let ano = Number(partesData[2]);
+                let dataEmissao = new Date(ano, mes, dia);
+
+                // Verificando se a data é válida
+                if (dataEmissao.getFullYear() === ano && dataEmissao.getMonth() === mes && dataEmissao.getDate() === dia) {
+                    return dataEmissao;
+                }
+            }
+            console.error("Data de emissão inválida. Utilize o padrão dd/mm/yyyy.");
+        }
+    }
+
+    
+    private validarCPF(cpf: string): boolean {
+        return cpf.length === 11 && !isNaN(Number(cpf));
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\CADASTROPET.TS CODE IS BELOW
+import Entrada from "../io/entrada";
+import Pet from "../modelo/pet";
+import Cadastro from "./cadastro";
+
+export default class CadastroPet extends Cadastro {
+    private pets: Array<Pet>;
+    private entrada: Entrada;
+
+    constructor(pets: Array<Pet>) {
+        super();
+        this.pets = pets;
+        this.entrada = new Entrada();
+    }
+
+    public cadastrar(): void {
+        console.log(`\nInício do cadastro do pet`);
+        let nome = this.entrada.receberTexto(`Por favor informe o nome do pet: `);
+        let raca = this.entrada.receberTexto(`Por favor informe a raça do pet: `);
+        let genero = this.entrada.receberTexto(`Por favor informe o gênero do pet: `);
+        let tipo = this.entrada.receberTexto(`Por favor informe o tipo do pet (ex: cão, gato, etc.): `);
+
+        let pet = new Pet(nome, raca, genero, tipo);
+        this.pets.push(pet);
+        console.log(`\nCadastro do pet concluído :)\n`);
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\CADASTROPRODUTO.TS CODE IS BELOW
+import Entrada from "../io/entrada";
+import Produto from "../modelo/produto";
+import Cadastro from "./cadastro";
+
+export default class CadastroProduto extends Cadastro {
+    private produtos: Array<Produto>;
+    private entrada: Entrada;
+
+    constructor(produtos: Array<Produto>) {
+        super();
+        this.produtos = produtos;
+        this.entrada = new Entrada();
+    }
+
+    public cadastrar(): void {
+        console.log(`\nInício do cadastro do produto`);
+        let nome = this.entrada.receberTexto(`Por favor informe o nome do produto: `);
+        let preco = this.entrada.receberNumero(`Por favor informe o preço do produto: `);
+
+        let produto = new Produto(nome, preco);
+        this.produtos.push(produto);
+        console.log(`\nCadastro do produto concluído :)\n`);
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\LISTAGEM.TS CODE IS BELOW
+export default abstract class Listagem {
+    public abstract listar(): void
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\LISTAGEMCLIENTES.TS CODE IS BELOW
+import Cliente from "../modelo/cliente";
+import Listagem from "./listagem";
+
+export default class ListagemClientes extends Listagem {
+    private clientes: Array<Cliente>;
+
+    constructor(clientes: Array<Cliente>) {
+        super();
+        this.clientes = clientes;
+    }
+
+    public listar(): void {
+        console.log(`\nLista de todos os clientes:`);
+
+        if (this.clientes.length === 0) {
+            console.log("Nenhum cliente cadastrado.");
+            return;
+        }
+
+        this.clientes.forEach(cliente => {
+            console.log(`Nome: ` + cliente.nome);
+            console.log(`Nome social: ` + cliente.nomeSocial);
+            console.log(`CPF: ` + cliente.getCpf.getValor);
+            console.log(`--------------------------------------`);
+        });
+        console.log(`\n`);
+    }
+
+    public listarTop10Clientes(): void {
+        // Criando um objeto para contar o total de consumos por cliente
+        const consumoPorCliente: {[key: string]: number} = {};
+
+        this.clientes.forEach(cliente => {
+            const totalConsumo = cliente.getProdutosConsumidos.length + cliente.getServicosConsumidos.length;
+            consumoPorCliente[cliente.nome] = totalConsumo;
+        });
+
+        // Convertendo o objeto em um array e ordenando
+        const clientesOrdenados = Object.entries(consumoPorCliente)
+            .sort((a, b) => b[1] - a[1]) // ordenando por total de consumos em ordem decrescente
+            .slice(0, 10); // selecionando os 10 primeiros
+
+        console.log(`\nTop 10 Clientes que mais consumiram:`);
+        if (clientesOrdenados.length === 0) {
+            console.log("Nenhum consumo registrado.");
+            return;
+        }
+
+        clientesOrdenados.forEach((cliente) => {
+            console.log(`Cliente: ${cliente[0]}, Total de Consumos: ${cliente[1]}`);
+        });
+
+        console.log(`\n`);
+    }
+    public listarTop5ClientesPorValor(): void {
+        console.log(`\nTop 5 Clientes que mais consumiram em valor:`);
+    
+        const valorGastoPorCliente: { [key: string]: number } = {};
+    
+        // Calcular o total gasto por cliente
+        this.clientes.forEach(cliente => {
+            const totalGasto = cliente.getProdutosConsumidos.reduce((total, produto) => total + produto.preco, 0) +
+                               cliente.getServicosConsumidos.reduce((total, servico) => total + servico.preco, 0);
+            valorGastoPorCliente[cliente.nome] = totalGasto;
+        });
+    
+        // Ordenar clientes pelo valor gasto
+        const clientesOrdenados = Object.entries(valorGastoPorCliente)
+            .sort((a, b) => b[1] - a[1]) // ordem decrescente
+            .slice(0, 5); // Selecionar os 5 primeiros
+    
+        if (clientesOrdenados.length === 0) {
+            console.log("Nenhum consumo registrado.");
+            return;
+        }
+    
+        clientesOrdenados.forEach(cliente => {
+            console.log(`Cliente: ${cliente[0]}, Total Gasto: R$ ${cliente[1].toFixed(2)}`);
+        });
+    
+        console.log(`\n`);
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\LISTAGEMCONSUMO.TS CODE IS BELOW
+import Produto from "../modelo/produto";
+import Servico from "../modelo/servico";
+import Cliente from "../modelo/cliente";
+
+export default class ListagemConsumo {
+    private produtos: Array<Produto>;
+    private servicos: Array<Servico>;
+    private clientes: Array<Cliente>;
+
+    constructor(clientes: Array<Cliente>, produtos: Array<Produto>, servicos: Array<Servico>) {
+        this.clientes = clientes;
+        this.produtos = produtos;
+        this.servicos = servicos;
+    }
+
+    public listarProdutosMaisConsumidos(): void {
+        console.log(`\nProdutos mais consumidos:`);
+
+        const produtosOrdenados = this.produtos.sort((a, b) => b.consumoCount - a.consumoCount);
+
+        if (produtosOrdenados.length === 0) {
+            console.log("Nenhum produto cadastrado.");
+            return;
+        }
+
+        produtosOrdenados.forEach(produto => {
+            console.log(`Produto: ${produto.nome}, Consumo: ${produto.consumoCount} vezes`);
+        });
+    }
+
+    public listarServicosMaisConsumidos(): void {
+        console.log(`\nServiços mais consumidos:`);
+
+        const servicosOrdenados = this.servicos.sort((a, b) => b.consumoCount - a.consumoCount);
+        
+        if (servicosOrdenados.length === 0) {
+            console.log("Nenhum serviço cadastrado.");
+            return;
+        }
+
+        servicosOrdenados.forEach(servico => {
+            console.log(`Serviço: ${servico.nome}, Consumo: ${servico.consumoCount} vezes`);
+        });
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\LISTAGEMPETS.TS CODE IS BELOW
+import Pet from "../modelo/pet";
+import Listagem from "./listagem";
+
+export default class ListagemPets extends Listagem {
+    private pets: Array<Pet>;
+
+    constructor(pets: Array<Pet>) {
+        super();
+        this.pets = pets;
+    }
+
+    public listar(): void {
+        console.log(`\nLista de todos os pets:`);
+
+        if (this.pets.length === 0) {
+            console.log("Nenhum pet cadastrado.");
+            return;
+        }
+
+        this.pets.forEach(pet => {
+            console.log(`Nome: ${pet.getNome}`);
+            console.log(`Raça: ${pet.getRaca}`);
+            console.log(`Gênero: ${pet.getGenero}`);
+            console.log(`Tipo: ${pet.getTipo}`);
+            console.log(`--------------------------------------`);
+        });
+        console.log(`\n`);
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\LISTAGEMPRODUTOS.TS CODE IS BELOW
+import Produto from "../modelo/produto";
+import Listagem from "./listagem";
+
+export default class ListagemProdutos extends Listagem {
+    private produtos: Array<Produto>;
+
+    constructor(produtos: Array<Produto>) {
+        super();
+        this.produtos = produtos;
+    }
+
+    public listar(): void {
+        console.log(`\nLista de todos os produtos:`);
+
+        if (this.produtos.length === 0) {
+            console.log("Nenhum produto cadastrado.");
+            return;
+        }
+
+        this.produtos.forEach(produto => {
+            console.log(`Nome: ${produto.nome}`);
+            console.log(`Preço: ${produto.preco}`);
+            console.log(`--------------------------------------`);
+        });
+        console.log(`\n`);
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\SRC\NEGOCIO\REGISTROCONSUMO.TS CODE IS BELOW
+import Cliente from "../modelo/cliente";
+import Produto from "../modelo/produto";
+import Servico from "../modelo/servico";
+
+export default class RegistroConsumo {
+    private cliente: Cliente;
+
+    constructor(cliente: Cliente) {
+        this.cliente = cliente;
+    }
+
+    public registrarProduto(produto: Produto): void {
+        this.cliente.getProdutosConsumidos.push(produto);
+        produto.consumoCount++;
+        console.log(`Produto "${produto.nome}" registrado ao cliente.`);
+    }
+    
+    public registrarServico(servico: Servico): void {
+        this.cliente.getServicosConsumidos.push(servico);
+        servico.consumoCount++;
+        console.log(`Serviço "${servico.nome}" registrado ao cliente.`);
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV1\TSCONFIG.JSON CODE IS BELOW
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+
+    /* Projects */
+    // "incremental": true,                              /* Enable incremental compilation */
+    // "composite": true,                                /* Enable constraints that allow a TypeScript project to be used with project references. */
+    // "tsBuildInfoFile": "./",                          /* Specify the folder for .tsbuildinfo incremental compilation files. */
+    // "disableSourceOfProjectReferenceRedirect": true,  /* Disable preferring source files instead of declaration files when referencing composite projects */
+    // "disableSolutionSearching": true,                 /* Opt a project out of multi-project reference checking when editing. */
+    // "disableReferencedProjectLoad": true,             /* Reduce the number of projects loaded automatically by TypeScript. */
+
+    /* Language and Environment */
+    "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    // "lib": [],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+    // "jsx": "preserve",                                /* Specify what JSX code is generated. */
+    // "experimentalDecorators": true,                   /* Enable experimental support for TC39 stage 2 draft decorators. */
+    // "emitDecoratorMetadata": true,                    /* Emit design-type metadata for decorated declarations in source files. */
+    // "jsxFactory": "",                                 /* Specify the JSX factory function used when targeting React JSX emit, e.g. 'React.createElement' or 'h' */
+    // "jsxFragmentFactory": "",                         /* Specify the JSX Fragment reference used for fragments when targeting React JSX emit e.g. 'React.Fragment' or 'Fragment'. */
+    // "jsxImportSource": "",                            /* Specify module specifier used to import the JSX factory functions when using `jsx: react-jsx*`.` */
+    // "reactNamespace": "",                             /* Specify the object invoked for `createElement`. This only applies when targeting `react` JSX emit. */
+    // "noLib": true,                                    /* Disable including any library files, including the default lib.d.ts. */
+    // "useDefineForClassFields": true,                  /* Emit ECMAScript-standard-compliant class fields. */
+
+    /* Modules */
+    "module": "commonjs",                                /* Specify what module code is generated. */
+    // "rootDir": "./",                                  /* Specify the root folder within your source files. */
+    // "moduleResolution": "node",                       /* Specify how TypeScript looks up a file from a given module specifier. */
+    // "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
+    // "paths": {},                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
+    // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
+    // "typeRoots": [],                                  /* Specify multiple folders that act like `./node_modules/@types`. */
+    // "types": [],                                      /* Specify type package names to be included without being referenced in a source file. */
+    // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
+    // "resolveJsonModule": true,                        /* Enable importing .json files */
+    // "noResolve": true,                                /* Disallow `import`s, `require`s or `<reference>`s from expanding the number of files TypeScript should add to a project. */
+
+    /* JavaScript Support */
+    // "allowJs": true,                                  /* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */
+    // "checkJs": true,                                  /* Enable error reporting in type-checked JavaScript files. */
+    // "maxNodeModuleJsDepth": 1,                        /* Specify the maximum folder depth used for checking JavaScript files from `node_modules`. Only applicable with `allowJs`. */
+
+    /* Emit */
+    // "declaration": true,                              /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
+    // "declarationMap": true,                           /* Create sourcemaps for d.ts files. */
+    // "emitDeclarationOnly": true,                      /* Only output d.ts files and not JavaScript files. */
+    // "sourceMap": true,                                /* Create source map files for emitted JavaScript files. */
+    // "outFile": "./",                                  /* Specify a file that bundles all outputs into one JavaScript file. If `declaration` is true, also designates a file that bundles all .d.ts output. */
+    "outDir": "./out",                                   /* Specify an output folder for all emitted files. */
+    // "removeComments": true,                           /* Disable emitting comments. */
+    // "noEmit": true,                                   /* Disable emitting files from a compilation. */
+    // "importHelpers": true,                            /* Allow importing helper functions from tslib once per project, instead of including them per-file. */
+    // "importsNotUsedAsValues": "remove",               /* Specify emit/checking behavior for imports that are only used for types */
+    // "downlevelIteration": true,                       /* Emit more compliant, but verbose and less performant JavaScript for iteration. */
+    // "sourceRoot": "",                                 /* Specify the root path for debuggers to find the reference source code. */
+    // "mapRoot": "",                                    /* Specify the location where debugger should locate map files instead of generated locations. */
+    // "inlineSourceMap": true,                          /* Include sourcemap files inside the emitted JavaScript. */
+    // "inlineSources": true,                            /* Include source code in the sourcemaps inside the emitted JavaScript. */
+    // "emitBOM": true,                                  /* Emit a UTF-8 Byte Order Mark (BOM) in the beginning of output files. */
+    // "newLine": "crlf",                                /* Set the newline character for emitting files. */
+    // "stripInternal": true,                            /* Disable emitting declarations that have `@internal` in their JSDoc comments. */
+    // "noEmitHelpers": true,                            /* Disable generating custom helper functions like `__extends` in compiled output. */
+    // "noEmitOnError": true,                            /* Disable emitting files if any type checking errors are reported. */
+    // "preserveConstEnums": true,                       /* Disable erasing `const enum` declarations in generated code. */
+    // "declarationDir": "./",                           /* Specify the output directory for generated declaration files. */
+    // "preserveValueImports": true,                     /* Preserve unused imported values in the JavaScript output that would otherwise be removed. */
+
+    /* Interop Constraints */
+    // "isolatedModules": true,                          /* Ensure that each file can be safely transpiled without relying on other imports. */
+    // "allowSyntheticDefaultImports": true,             /* Allow 'import x from y' when a module doesn't have a default export. */
+    "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */
+    // "preserveSymlinks": true,                         /* Disable resolving symlinks to their realpath. This correlates to the same flag in node. */
+    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+
+    /* Type Checking */
+    "strict": true,                                      /* Enable all strict type-checking options. */
+    // "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied `any` type.. */
+    // "strictNullChecks": true,                         /* When type checking, take into account `null` and `undefined`. */
+    // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
+    // "strictBindCallApply": true,                      /* Check that the arguments for `bind`, `call`, and `apply` methods match the original function. */
+    // "strictPropertyInitialization": true,             /* Check for class properties that are declared but not set in the constructor. */
+    // "noImplicitThis": true,                           /* Enable error reporting when `this` is given the type `any`. */
+    // "useUnknownInCatchVariables": true,               /* Type catch clause variables as 'unknown' instead of 'any'. */
+    // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
+    // "noUnusedLocals": true,                           /* Enable error reporting when a local variables aren't read. */
+    // "noUnusedParameters": true,                       /* Raise an error when a function parameter isn't read */
+    // "exactOptionalPropertyTypes": true,               /* Interpret optional property types as written, rather than adding 'undefined'. */
+    // "noImplicitReturns": true,                        /* Enable error reporting for codepaths that do not explicitly return in a function. */
+    // "noFallthroughCasesInSwitch": true,               /* Enable error reporting for fallthrough cases in switch statements. */
+    // "noUncheckedIndexedAccess": true,                 /* Include 'undefined' in index signature results */
+    // "noImplicitOverride": true,                       /* Ensure overriding members in derived classes are marked with an override modifier. */
+    // "noPropertyAccessFromIndexSignature": true,       /* Enforces using indexed accessors for keys declared using an indexed type */
+    // "allowUnusedLabels": true,                        /* Disable error reporting for unused labels. */
+    // "allowUnreachableCode": true,                     /* Disable error reporting for unreachable code. */
+
+    /* Completeness */
+    // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
+    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+  }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\APP\MAIN.TS CODE IS BELOW
+import Entrada from "../io/entrada";
+import Empresa from "../modelo/empresa";
+import CadastroCliente from "../negocio/cadastroCliente";
+import ListagemClientes from "../negocio/listagemClientes";
+import CadastroPet from "../negocio/cadastroPet";
+import ListagemPets from "../negocio/ListagemPets";
+import ListagemProdutos from "../negocio/listagemProdutos";
+import CadastroProduto from "../negocio/cadastroProduto";
+import RegistroConsumo from "../negocio/registroConsumo"
+import ListagemConsumo from "../negocio/listagemConsumo";
+
+
+console.log(`Bem-vindo ao melhor sistema de gerenciamento de pet shops e clínicas veterinarias`)
+let empresa = new Empresa()
+let execucao = true
+
+while (execucao) {
+    console.log(`Opções:`);
+    console.log(`1 - Cadastrar Cliente`);
+    console.log(`2 - Listar Todos os Clientes`);
+    console.log(`3 - Cadastrar Pet`); 
+    console.log(`4 - Listar Todos os Pets`); 
+    console.log(`5 - Cadastrar Produto`);
+    console.log(`6 - Listar Todos os Produtos`);
+    console.log(`7 - Registrar Consumo`);
+    console.log(`8 - Listar Top 10 Clientes`); 
+    console.log(`9 - Listar Produtos Mais Consumidos`); 
+    console.log(`10 - Listar Serviços Mais Consumidos`); 
+    console.log(`11 - Listar Clientes que Mais Gastaram`);
+    console.log(`0 - Sair`);
+
+    let entrada = new Entrada();
+    let opcao = entrada.receberNumero(`Por favor, escolha uma opção: `);
+
+    switch (opcao) {
+        case 1:
+            let cadastroCliente = new CadastroCliente(empresa.getClientes);
+            cadastroCliente.cadastrar();
+            break;
+        case 2:
+            let listagemClientes = new ListagemClientes(empresa.getClientes);
+            listagemClientes.listar();
+            break;
+        case 3:
+            let cadastroPet = new CadastroPet(empresa.getPets);
+            cadastroPet.cadastrar();
+            break;
+        case 4:
+            let listagemPets = new ListagemPets(empresa.getPets);
+            listagemPets.listar();
+            break;
+        case 5:
+            let cadastroProduto = new CadastroProduto(empresa.getProdutos);
+            cadastroProduto.cadastrar();
+            break;
+        case 6:
+            let listagemProdutos = new ListagemProdutos(empresa.getProdutos);
+            listagemProdutos.listar();
+            break;
+        case 7:
+            let nomeCliente = entrada.receberTexto(`Informe o nome do cliente para registrar o consumo: `);
+            let cliente = empresa.getClientes.find(c => c.nome === nomeCliente);
+            if (cliente) {
+                let tipoConsumo = entrada.receberNumero(`O que você gostaria de registrar?\n1 - Produto\n2 - Serviço\nEscolha uma opção: `);
+                if (tipoConsumo === 1) {
+                    let nomeProduto = entrada.receberTexto(`Informe o nome do produto consumido: `);
+                    let produto = empresa.getProdutos.find(p => p.nome === nomeProduto);
+                    if (produto) {
+                        const registroConsumo = new RegistroConsumo(cliente);
+                        registroConsumo.registrarProduto(produto);
+                    } else {
+                        console.log(`Produto não encontrado.`);
+                    }
+                } else if (tipoConsumo === 2) {
+                    let nomeServico = entrada.receberTexto(`Informe o nome do serviço consumido: `);
+                    let servico = empresa.getServicos.find(s => s.nome === nomeServico);
+                    if (servico) {
+                        const registroConsumo = new RegistroConsumo(cliente);
+                        registroConsumo.registrarServico(servico);
+                    } else {
+                        console.log(`Serviço não encontrado.`);
+                    }
+                } else {
+                    console.log(`Opção de consumo não reconhecida.`);
+                }
+            } else {
+                console.log(`Cliente não encontrado.`);
+            }
+            break;
+        case 8:
+            let listarTop10 = new ListagemClientes(empresa.getClientes);
+            listarTop10.listarTop10Clientes();
+            break;
+        case 9:
+            let listagemConsumoProdutos = new ListagemConsumo(empresa.getClientes, empresa.getProdutos, empresa.getServicos);
+            listagemConsumoProdutos.listarProdutosMaisConsumidos();
+            break;
+        
+        case 10:
+            let listagemConsumoServicos = new ListagemConsumo(empresa.getClientes, empresa.getProdutos, empresa.getServicos);
+            listagemConsumoServicos.listarServicosMaisConsumidos();
+            break;
+        case 11:
+        let listagemValorGasto = new ListagemClientes(empresa.getClientes);
+        listagemValorGasto.listarTop5ClientesPorValor();
+            break;
+        case 0:
+            execucao = false;
+            console.log(`Até mais`);
+            break;
+        default:
+            console.log(`Operação não entendida :(`);
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\APP.TSX CODE IS BELOW
+import React, { Component } from 'react';
+import { Container, Navbar, Nav } from 'react-bootstrap';
+import FormularioCadastroCliente from './formularioCadastroCliente';
+import FormularioCadastroPet from './formularioCadastroPet';
+import FormularioCadastroProduto from './formularioCadastroProduto';
+import ListaCliente from './listaClientes';
+import ListaPets from './listaPets';
+import ListaProdutos from './listaProdutos';
+import Cliente from '../modelo/cliente';
+import Pet from '../modelo/pet';
+import Produto from '../modelo/produto';
+import CPF from '../modelo/cpf';
+
+
+type State = {
+  tela: string;
+  clientes: Cliente[];
+  pets: Pet[];
+  produtos: Produto[];
+};
+
+export default class App extends Component<{}, State> {
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      tela: 'Nenhuma',
+      clientes: [],
+      pets: [],
+      produtos: [],
+    };
+  }
+
+  navegarPara = (tela: string) => {
+    this.setState({ tela });
+  }
+
+  cadastrarCliente = (nome: string, cpfValor: string, nomeSocial: string) => {
+    const cpf = new CPF(cpfValor, new Date()); 
+
+    const novoCliente = new Cliente(nome, nomeSocial, cpf);
+
+    this.setState((prevState) => ({
+      clientes: [...prevState.clientes, novoCliente]
+    }));
+  
+
+    alert(`Cliente ${nome} cadastrado com sucesso!`);
+  };
+
+  cadastrarPet = (nome: string, raca: string, genero: string, tipo: string) => {
+    const novoPet = new Pet(nome, raca, genero, tipo);
+    this.setState((prevState) => ({
+      pets: [...prevState.pets, novoPet]
+    }));
+    alert(`Pet ${nome} cadastrado com sucesso!`);
+  };
+
+  cadastrarProduto = (nome: string, preco: number) => {
+    const novoProduto = new Produto(nome, preco);
+    this.setState((prevState) => ({
+      produtos: [...prevState.produtos, novoProduto]
+    }));
+    alert(`Produto ${nome} cadastrado com sucesso!`);
+  };
+
+  render() {
+    const { tela, clientes, pets, produtos } = this.state;
+    let conteudo;
+
+    switch (tela) {
+      case 'CadastroClientes':
+        conteudo = <FormularioCadastroCliente tema="#e3f2fd" onCadastrar={this.cadastrarCliente} />;
+        break;
+      case 'CadastroPets':
+        conteudo = <FormularioCadastroPet tema="#e3f2fd" onCadastrar={this.cadastrarPet} />;
+        break;
+      case 'CadastroProdutos':
+        conteudo = <FormularioCadastroProduto tema="#e3f2fd" onCadastrar={this.cadastrarProduto} />;
+        break;
+        case 'ListaClientes':
+            conteudo = <ListaCliente clientes={clientes} tema="#e3f2fd" />;
+            break;
+          case 'ListaPets':
+            conteudo = <ListaPets pets={pets} tema="#e3f2fd" />;
+            break;
+          case 'ListaProdutos':
+            conteudo = <ListaProdutos produtos={produtos} tema="#e3f2fd" />;
+            break;
+      default:
+        conteudo = <div>Selecione uma opção no menu para começar</div>;
+    }
+
+    return (
+      <>
+        <Navbar bg="light" expand="lg">
+          <Navbar.Brand href="#">Sistema C4P</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto">
+              <Nav.Link href="#" onClick={() => this.navegarPara('CadastroClientes')}>Cadastro Clientes</Nav.Link>
+              <Nav.Link href="#" onClick={() => this.navegarPara('CadastroPets')}>Cadastro Pets</Nav.Link>
+              <Nav.Link href="#" onClick={() => this.navegarPara('CadastroProdutos')}>Cadastro Produtos</Nav.Link>
+              <Nav.Link href="#" onClick={() => this.navegarPara('ListaClientes')}>Listar Clientes</Nav.Link>
+              <Nav.Link href="#" onClick={() => this.navegarPara('ListaPets')}>Listar Pets</Nav.Link>
+              <Nav.Link href="#" onClick={() => this.navegarPara('ListaProdutos')}>Listar Produtos</Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
+        <Container className="mt-3">
+          {conteudo}
+        </Container>
+      </>
+    );
+  }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\BARRANAVEGACAO.TSX CODE IS BELOW
+import React, { Component } from "react";
+import { Navbar, Nav, Container } from 'react-bootstrap';
+
+type Props = {
+    onClickBotao: (novaTela: string, evento: React.MouseEvent<any>) => void;
+    tema: string;
+    botoes: string[];
+  };
+  
+  export default class BarraNavegacao extends Component<Props> {
+    render() {
+      const { tema, botoes, onClickBotao } = this.props;
+  
+      return (
+        <Navbar bg={tema} expand="lg" fixed="top">
+          <Container>
+            <Navbar.Brand href="#home">PetShop</Navbar.Brand>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="me-auto">
+                {botoes.map(botao => (
+                  <Nav.Link key={botao} href="#" onClick={(e) => onClickBotao(botao, e)}>
+                    {botao}
+                  </Nav.Link>
+                ))}
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
+      );
+    }
+  }
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\FORMULARIOCADASTROCLIENTE.TSX CODE IS BELOW
+import React, { Component } from 'react';
+
+type Props = {
+  tema: string;
+  onCadastrar: (nome: string, cpf: string, nomeSocial: string) => void;
+};
+
+type State = {
+  nome: string;
+  cpf: string;
+  nomeSocial: string;
+};
+
+export default class FormularioCadastroCliente extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      nome: '',
+      cpf: '',
+      nomeSocial: '',
+    };
+  }
+
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ [event.target.name]: event.target.value } as Pick<State, keyof State>);
+  }
+
+  submitForm = () => {
+    const { nome, cpf, nomeSocial } = this.state;
+    this.props.onCadastrar(nome, cpf, nomeSocial);
+    this.setState({ nome: '', cpf: '', nomeSocial: '' });
+  }
+
+  render() {
+    return (
+      <div style={{ backgroundColor: this.props.tema, padding: '20px', borderRadius: '5px' }}>
+        <h2>Cadastrar Cliente</h2>
+        <input
+          type="text"
+          name="nome"
+          placeholder="Nome"
+          value={this.state.nome}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <input
+          type="text"
+          name="cpf"
+          placeholder="CPF"
+          value={this.state.cpf}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <input
+          type="text"
+          name="nomeSocial"
+          placeholder="Nome Social"
+          value={this.state.nomeSocial}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <button onClick={this.submitForm}>Cadastrar Cliente</button>
+      </div>
+    );
+  }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\FORMULARIOCADASTROPET.TSX CODE IS BELOW
+import React, { Component } from 'react';
+
+type Props = {
+  tema: string;
+  onCadastrar: (nome: string, raca: string, genero: string, tipo: string) => void;
+};
+
+type State = {
+  nome: string;
+  raca: string;
+  genero: string;
+  tipo: string;
+};
+
+export default class FormularioCadastroPet extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      nome: '',
+      raca: '',
+      genero: '',
+      tipo: '',
+    };
+  }
+
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    this.setState({ [name]: value } as Pick<State, keyof State>);
+  }
+
+  submitForm = () => {
+    const { nome, raca, genero, tipo } = this.state;
+    this.props.onCadastrar(nome, raca, genero, tipo);
+    this.setState({ nome: '', raca: '', genero: '', tipo: '' });
+  }
+
+  render() {
+    return (
+      <div style={{ backgroundColor: this.props.tema, padding: '20px', borderRadius: '5px' }}>
+        <h2>Cadastrar Pet</h2>
+        <input
+          type="text"
+          name="nome"
+          placeholder="Nome do Pet"
+          value={this.state.nome}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <input
+          type="text"
+          name="raca"
+          placeholder="Raça"
+          value={this.state.raca}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <input
+          type="text"
+          name="genero"
+          placeholder="Gênero"
+          value={this.state.genero}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <input
+          type="text"
+          name="tipo"
+          placeholder="Tipo"
+          value={this.state.tipo}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <button onClick={this.submitForm}>Cadastrar Pet</button>
+      </div>
+    );
+  }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\FORMULARIOCADASTROPRODUTO.TSX CODE IS BELOW
+import React, { Component } from 'react';
+
+type Props = {
+  tema: string;
+  onCadastrar: (nome: string, preco: number) => void;
+};
+
+type State = {
+  nome: string;
+  preco: number | '';
+};
+
+export default class FormularioCadastroProduto extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      nome: '',
+      preco: '',
+    };
+  }
+
+  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    this.setState({ [name]: name === 'preco' ? parseFloat(value) || '' : value } as Pick<State, keyof State>);
+  }
+
+  submitForm = () => {
+    const { nome, preco } = this.state;
+    if (preco !== '') {
+      this.props.onCadastrar(nome, preco);
+      this.setState({ nome: '', preco: '' });
+    }
+  }
+
+  render() {
+    return (
+      <div style={{ backgroundColor: this.props.tema, padding: '20px', borderRadius: '5px' }}>
+        <h2>Cadastrar Produto</h2>
+        <input
+          type="text"
+          name="nome"
+          placeholder="Nome do Produto"
+          value={this.state.nome}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <input
+          type="number"
+          name="preco"
+          placeholder="Preço"
+          value={this.state.preco}
+          onChange={this.handleChange}
+          style={{ margin: '5px' }}
+        />
+        <button onClick={this.submitForm}>Cadastrar Produto</button>
+      </div>
+    );
+  }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\LISTACLIENTES.TSX CODE IS BELOW
+import { Component } from "react";
+import Cliente from "../modelo/cliente";
+
+type Props = {
+    clientes: Cliente[];
+    tema: string;
+}
+
+export default class ListaCliente extends Component<Props> {
+    render() {
+        const { clientes, tema } = this.props;
+
+        return (
+            <div className="container-fluid">
+                <div className="list-group">
+                    {clientes.map(cliente => (
+                        <a href="#" className="list-group-item list-group-item-action" key={cliente.getCpf.getValor}>
+                            Nome: {cliente.nome}, CPF: {cliente.getCpf.getValor}
+                        </a>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\LISTAPETS.TSX CODE IS BELOW
+import { Component } from "react";
+import Pet from "../modelo/pet";
+
+type Props = {
+    pets: Pet[];
+    tema: string;
+}
+
+export default class ListaPets extends Component<Props> {
+    render() {
+        const { pets, tema } = this.props;
+
+        return (
+            <div className="container-fluid">
+                <div className="list-group">
+                    {pets.map(pet => (
+                        <a href="#" className="list-group-item list-group-item-action" key={pet.nome}>
+                            Nome: {pet.getNome}, Raça: {pet.getRaca}, Tipo: {pet.getTipo}
+                        </a>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\LISTAPRODUTOS.TSX CODE IS BELOW
+import { Component } from "react";
+import Produto from "../modelo/produto";
+
+type Props = {
+    produtos: Produto[];
+    tema: string;
+}
+
+export default class ListaProdutos extends Component<Props> {
+    render() {
+        const { produtos, tema } = this.props;
+
+        return (
+            <div className="container-fluid">
+                <div className="list-group">
+                    {produtos.map(produto => (
+                        <a href="#" className="list-group-item list-group-item-action" key={produto.nome}>
+                            Nome: {produto.nome}, Preço: R$ {produto.preco.toFixed(2)}
+                        </a>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\COMPONENTES\ROTEADOR.TSX CODE IS BELOW
+import React, { Component } from "react";
+import BarraNavegacao from "./barraNavegacao";
+import ListaCliente from "./listaClientes";
+import FormularioCadastroCliente from "./formularioCadastroCliente";
+import ListaPets from "./listaPets";
+import FormularioCadastroPet from "./formularioCadastroPet";
+import ListaProdutos from "./listaProdutos";
+import FormularioCadastroProduto from "./formularioCadastroProduto";
+import Produto from "../modelo/produto";
+import Pet from "../modelo/pet";
+import Cliente from "../modelo/cliente";
+
+type State = {
+  tela: string;
+  clientes: Cliente[];
+  pets: Pet[];
+  produtos: Produto[];
+};
+
+export default class Roteador extends Component<{}, State> {
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      tela: 'Clientes',
+      clientes: [],
+      pets: [],
+      produtos: [],
+    };
+    this.selecionarView = this.selecionarView.bind(this);
+    this.cadastrarProduto = this.cadastrarProduto.bind(this);
+    this.cadastrarPet = this.cadastrarPet.bind(this);
+  }
+
+  selecionarView(novaTela: string, evento: React.MouseEvent<HTMLAnchorElement>) {
+    evento.preventDefault();
+    this.setState({ tela: novaTela });
+  }
+
+  cadastrarProduto(nome: string, preco: number) {
+    const novoProduto = new Produto(nome, preco);
+    this.setState((prevState) => ({
+      ...prevState,
+      produtos: [...prevState.produtos, novoProduto]
+    }));
+    console.log(`Produto ${nome} cadastrado com sucesso!`);
+  }
+
+  cadastrarPet(nome: string, raca: string, genero: string, tipo: string) {
+    const novoPet = new Pet(nome, raca, genero, tipo);
+    this.setState((prevState) => ({
+      ...prevState,
+      pets: [...prevState.pets, novoPet]
+    }));
+    console.log(`Pet ${nome} cadastrado com sucesso!`);
+  }
+
+  render() {
+    const { tela, clientes, pets, produtos } = this.state;
+    const barraNavegacao = (
+      <BarraNavegacao
+        onClickBotao={this.selecionarView}
+        tema="#e3f2fd"
+        botoes={['Clientes', 'CadastrosClientes', 'Pets', 'CadastrosPets', 'Produtos', 'CadastrosProdutos']}
+      />
+    );
+
+    return (
+      <>
+        {barraNavegacao}
+        {tela === 'Clientes' && <ListaCliente clientes={clientes} tema="#e3f2fd" />}
+        {tela === 'CadastrosClientes' && <FormularioCadastroCliente tema="#e3f2fd" onCadastrar={function (nome: string, cpf: string, nomeSocial: string): void {
+                throw new Error("Function not implemented.");
+            } } />}
+        {tela === 'Pets' && <ListaPets pets={pets} tema="#e3f2fd" />}
+        {tela === 'CadastrosPets' && <FormularioCadastroPet tema="#e3f2fd" onCadastrar={this.cadastrarPet} />}
+        {tela === 'Produtos' && <ListaProdutos produtos={produtos} tema="#e3f2fd" />}
+        {tela === 'CadastrosProdutos' && <FormularioCadastroProduto tema="#e3f2fd" onCadastrar={this.cadastrarProduto} />}
+      </>
+    );
+  }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\INDEX.CSS CODE IS BELOW
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\INDEX.TSX CODE IS BELOW
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './index.css';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './componentes/App'
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\IO\ENTRADA.TS CODE IS BELOW
+import promptSync from "prompt-sync";
+export default class Entrada {
+    public receberNumero(mensagem: string): number {
+        let prompt = promptSync();
+        let valor = prompt(mensagem)
+        let numero  = new Number(valor)
+        return numero.valueOf()
+    }
+    public receberTexto(mensagem: string): string {
+        let prompt = promptSync();
+        let texto = prompt(mensagem)
+        return texto
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\CLIENTE.JS CODE IS BELOW
+var Cliente = /** @class */ (function () {
+    function Cliente(nome, nomeSocial, cpf) {
+        this.nome = nome;
+        this.nomeSocial = nomeSocial;
+        this.cpf = cpf;
+        this.rgs = [];
+        this.dataCadastro = new Date();
+        this.telefones = [];
+        this.produtosConsumidos = [];
+        this.servicosConsumidos = [];
+        this.pets = [];
+    }
+    Object.defineProperty(Cliente.prototype, "getCpf", {
+        get: function () {
+            return this.cpf;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getRgs", {
+        get: function () {
+            return this.rgs;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getDataCadastro", {
+        get: function () {
+            return this.dataCadastro;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getTelefones", {
+        get: function () {
+            return this.telefones;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getProdutosConsumidos", {
+        get: function () {
+            return this.produtosConsumidos;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getServicosConsumidos", {
+        get: function () {
+            return this.servicosConsumidos;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Cliente.prototype, "getPets", {
+        get: function () {
+            return this.pets;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Cliente;
+}());
+export default Cliente;
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\CLIENTE.TS CODE IS BELOW
+import CPF from "./cpf"
+import Pet from "./pet"
+import Produto from "./produto"
+import RG from "./rg"
+import Servico from "./servico"
+import Telefone from "./telefone"
+
+export default class Cliente {
+    public nome: string
+    public nomeSocial: string
+    private cpf: CPF
+    private rgs: Array<RG>
+    private dataCadastro: Date
+    private telefones: Array<Telefone>
+    private produtosConsumidos: Array<Produto>
+    private servicosConsumidos: Array<Servico>
+    private pets: Array<Pet>
+    constructor(nome: string, nomeSocial: string, cpf: CPF) {
+        this.nome = nome
+        this.nomeSocial = nomeSocial
+        this.cpf = cpf
+        this.rgs = []
+        this.dataCadastro = new Date()
+        this.telefones = []
+        this.produtosConsumidos = []
+        this.servicosConsumidos = []
+        this.pets = []
+    }
+    public get getCpf(): CPF {
+        return this.cpf
+    }
+    public get getRgs(): Array<RG> {
+        return this.rgs
+    }
+    public get getDataCadastro(): Date {
+        return this.dataCadastro
+    }
+    public get getTelefones(): Array<Telefone> {
+        return this.telefones
+    }
+    public get getProdutosConsumidos(): Array<Produto> {
+        return this.produtosConsumidos
+    }
+    public get getServicosConsumidos(): Array<Servico> {
+        return this.servicosConsumidos
+    }
+    public get getPets(): Array<Pet>{
+        return this.pets
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\CPF.TS CODE IS BELOW
+export default class CPF {
+    private valor: string
+    private dataEmissao: Date
+    constructor(valor: string, dataEmissao: Date) {
+        this.valor = valor
+        this.dataEmissao = dataEmissao
+    }
+    public get getValor(): string {
+        return this.valor
+    }
+    public get getDataEmissao(): Date {
+        return this.dataEmissao
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\EMPRESA.TS CODE IS BELOW
+import Cliente from "./cliente";
+import Produto from "./produto";
+import Servico from "./servico";
+import Pet from "./pet";
+
+export default class Empresa {
+    private clientes: Array<Cliente>;
+    private produtos: Array<Produto>;
+    private servicos: Array<Servico>;
+    private pets: Array<Pet>;
+
+    constructor() {
+        this.clientes = [];
+        this.produtos = [];
+        this.servicos = [];
+        this.pets = [];
+    }
+
+    public get getClientes() {
+        return this.clientes;
+    }
+
+    public get getProdutos() {
+        return this.produtos;
+    }
+
+    public get getServicos() {
+        return this.servicos;
+    }
+
+    public get getPets() {
+        return this.pets;
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\PET.TS CODE IS BELOW
+export default class Pet {
+    public nome: string
+    public tipo: string
+    public raca: string
+    public genero: string
+
+    constructor(nome: string, raca: string, genero: string, tipo: string) {
+        this.nome = nome
+        this.raca = raca
+        this.genero = genero
+        this.tipo = tipo
+    }
+
+    public get getNome(){return this.nome}
+    public get getRaca(){return this.raca}
+    public get getGenero(){return this.genero}
+    public get getTipo(){return this.tipo}
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\PRODUTO.TS CODE IS BELOW
+export default class Produto {
+    public nome: string;
+    public preco: number;
+    public consumoCount: number;
+
+    constructor(nome: string, preco: number) {
+        this.nome = nome;
+        this.preco = preco;
+        this.consumoCount = 0; 
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\RG.TS CODE IS BELOW
+export default class RG {
+    private valor: string
+    private dataEmissao: Date
+    constructor(valor: string, dataEmissao: Date) {
+        this.valor = valor
+        this.dataEmissao = dataEmissao
+    }
+    public get getValor(): string {
+        return this.valor
+    }
+    public get getDataEmissao(): Date {
+        return this.dataEmissao
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\SERVICO.TS CODE IS BELOW
+export default class Servico {
+    public nome: string;
+    public preco: number;
+    public consumoCount: number;
+
+    constructor(nome: string, preco: number) {
+        this.nome = nome;
+        this.preco = preco;
+        this.consumoCount = 0;
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\MODELO\TELEFONE.TS CODE IS BELOW
+export default class Telefone {
+    private ddd: string
+    private numero: string
+    constructor(ddd: string, numero: string) {
+        this.ddd = ddd
+        this.numero = numero
+    }
+
+    public get getDdd(): string {
+        return this.ddd
+    }
+
+    public get getNumero(): string {
+        return this.numero
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\CADASTRO.TS CODE IS BELOW
+export default abstract class Cadastro {
+    public abstract cadastrar(): void
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\CADASTROCLIENTE.TS CODE IS BELOW
+import Entrada from "../io/entrada";
+import Cliente from "../modelo/cliente";
+import CPF from "../modelo/cpf";
+import Cadastro from "./cadastro";
+
+export default class CadastroCliente extends Cadastro {
+    private clientes: Array<Cliente>;
+    private entrada: Entrada;
+
+    constructor(clientes: Array<Cliente>) {
+        super();
+        this.clientes = clientes;
+        this.entrada = new Entrada();
+    }
+
+    public cadastrar(): void {
+        console.log(`\nInício do cadastro do cliente`);
+
+        let nome = this.entrada.receberTexto(`Por favor informe o nome do cliente: `);
+        let nomeSocial = this.entrada.receberTexto(`Por favor informe o nome social do cliente: `);
+        let valor = this.receberCpf();
+        let dataEmissao = this.receberData();
+
+        const cpf = new CPF(valor, dataEmissao);
+        const cliente = new Cliente(nome, nomeSocial, cpf);
+        this.clientes.push(cliente);
+        console.log(`\nCadastro concluído :)\n`);
+    }
+
+    private receberCpf(): string {
+        let valor: string;
+        while (true) {
+            valor = this.entrada.receberTexto(`Por favor informe o número do CPF: `);
+            if (this.validarCPF(valor)) {
+                return valor;
+            } else {
+                console.error("Informe um CPF válido.");
+            }
+        }
+    }
+
+    private receberData(): Date {
+        let data: string;
+        while (true) {
+            data = this.entrada.receberTexto(`Por favor informe a data de emissão do CPF, no padrão dd/mm/yyyy: `);
+            let partesData = data.split('/');
+            if (partesData.length === 3) {
+                let dia = Number(partesData[0]);
+                let mes = Number(partesData[1]) - 1;
+                let ano = Number(partesData[2]);
+                let dataEmissao = new Date(ano, mes, dia);
+
+                // Verificando se a data é válida
+                if (dataEmissao.getFullYear() === ano && dataEmissao.getMonth() === mes && dataEmissao.getDate() === dia) {
+                    return dataEmissao;
+                }
+            }
+            console.error("Data de emissão inválida. Utilize o padrão dd/mm/yyyy.");
+        }
+    }
+
+    
+    private validarCPF(cpf: string): boolean {
+        return cpf.length === 11 && !isNaN(Number(cpf));
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\CADASTROPET.TS CODE IS BELOW
+import Entrada from "../io/entrada";
+import Pet from "../modelo/pet";
+import Cadastro from "./cadastro";
+
+export default class CadastroPet extends Cadastro {
+    private pets: Array<Pet>;
+    private entrada: Entrada;
+
+    constructor(pets: Array<Pet>) {
+        super();
+        this.pets = pets;
+        this.entrada = new Entrada();
+    }
+
+    public cadastrar(): void {
+        console.log(`\nInício do cadastro do pet`);
+        let nome = this.entrada.receberTexto(`Por favor informe o nome do pet: `);
+        let raca = this.entrada.receberTexto(`Por favor informe a raça do pet: `);
+        let genero = this.entrada.receberTexto(`Por favor informe o gênero do pet: `);
+        let tipo = this.entrada.receberTexto(`Por favor informe o tipo do pet (ex: cão, gato, etc.): `);
+
+        let pet = new Pet(nome, raca, genero, tipo);
+        this.pets.push(pet);
+        console.log(`\nCadastro do pet concluído :)\n`);
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\CADASTROPRODUTO.TS CODE IS BELOW
+import Entrada from "../io/entrada";
+import Produto from "../modelo/produto";
+import Cadastro from "./cadastro";
+
+export default class CadastroProduto extends Cadastro {
+    private produtos: Array<Produto>;
+    private entrada: Entrada;
+
+    constructor(produtos: Array<Produto>) {
+        super();
+        this.produtos = produtos;
+        this.entrada = new Entrada();
+    }
+
+    public cadastrar(): void {
+        console.log(`\nInício do cadastro do produto`);
+        let nome = this.entrada.receberTexto(`Por favor informe o nome do produto: `);
+        let preco = this.entrada.receberNumero(`Por favor informe o preço do produto: `);
+
+        let produto = new Produto(nome, preco);
+        this.produtos.push(produto);
+        console.log(`\nCadastro do produto concluído :)\n`);
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\LISTAGEM.TS CODE IS BELOW
+export default abstract class Listagem {
+    public abstract listar(): void
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\LISTAGEMCLIENTES.TS CODE IS BELOW
+import Cliente from "../modelo/cliente";
+import Listagem from "./listagem";
+
+export default class ListagemClientes extends Listagem {
+    private clientes: Array<Cliente>;
+
+    constructor(clientes: Array<Cliente>) {
+        super();
+        this.clientes = clientes;
+    }
+
+    public listar(): void {
+        console.log(`\nLista de todos os clientes:`);
+
+        if (this.clientes.length === 0) {
+            console.log("Nenhum cliente cadastrado.");
+            return;
+        }
+
+        this.clientes.forEach(cliente => {
+            console.log(`Nome: ` + cliente.nome);
+            console.log(`Nome social: ` + cliente.nomeSocial);
+            console.log(`CPF: ` + cliente.getCpf.getValor);
+            console.log(`--------------------------------------`);
+        });
+        console.log(`\n`);
+    }
+
+    public listarTop10Clientes(): void {
+        // Criando um objeto para contar o total de consumos por cliente
+        const consumoPorCliente: {[key: string]: number} = {};
+
+        this.clientes.forEach(cliente => {
+            const totalConsumo = cliente.getProdutosConsumidos.length + cliente.getServicosConsumidos.length;
+            consumoPorCliente[cliente.nome] = totalConsumo;
+        });
+
+        // Convertendo o objeto em um array e ordenando
+        const clientesOrdenados = Object.entries(consumoPorCliente)
+            .sort((a, b) => b[1] - a[1]) // ordenando por total de consumos em ordem decrescente
+            .slice(0, 10); // selecionando os 10 primeiros
+
+        console.log(`\nTop 10 Clientes que mais consumiram:`);
+        if (clientesOrdenados.length === 0) {
+            console.log("Nenhum consumo registrado.");
+            return;
+        }
+
+        clientesOrdenados.forEach((cliente) => {
+            console.log(`Cliente: ${cliente[0]}, Total de Consumos: ${cliente[1]}`);
+        });
+
+        console.log(`\n`);
+    }
+    public listarTop5ClientesPorValor(): void {
+        console.log(`\nTop 5 Clientes que mais consumiram em valor:`);
+    
+        const valorGastoPorCliente: { [key: string]: number } = {};
+    
+        // Calcular o total gasto por cliente
+        this.clientes.forEach(cliente => {
+            const totalGasto = cliente.getProdutosConsumidos.reduce((total, produto) => total + produto.preco, 0) +
+                               cliente.getServicosConsumidos.reduce((total, servico) => total + servico.preco, 0);
+            valorGastoPorCliente[cliente.nome] = totalGasto;
+        });
+    
+        // Ordenar clientes pelo valor gasto
+        const clientesOrdenados = Object.entries(valorGastoPorCliente)
+            .sort((a, b) => b[1] - a[1]) // ordem decrescente
+            .slice(0, 5); // Selecionar os 5 primeiros
+    
+        if (clientesOrdenados.length === 0) {
+            console.log("Nenhum consumo registrado.");
+            return;
+        }
+    
+        clientesOrdenados.forEach(cliente => {
+            console.log(`Cliente: ${cliente[0]}, Total Gasto: R$ ${cliente[1].toFixed(2)}`);
+        });
+    
+        console.log(`\n`);
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\LISTAGEMCONSUMO.TS CODE IS BELOW
+import Produto from "../modelo/produto";
+import Servico from "../modelo/servico";
+import Cliente from "../modelo/cliente";
+
+export default class ListagemConsumo {
+    private produtos: Array<Produto>;
+    private servicos: Array<Servico>;
+    private clientes: Array<Cliente>;
+
+    constructor(clientes: Array<Cliente>, produtos: Array<Produto>, servicos: Array<Servico>) {
+        this.clientes = clientes;
+        this.produtos = produtos;
+        this.servicos = servicos;
+    }
+
+    public listarProdutosMaisConsumidos(): void {
+        console.log(`\nProdutos mais consumidos:`);
+
+        const produtosOrdenados = this.produtos.sort((a, b) => b.consumoCount - a.consumoCount);
+
+        if (produtosOrdenados.length === 0) {
+            console.log("Nenhum produto cadastrado.");
+            return;
+        }
+
+        produtosOrdenados.forEach(produto => {
+            console.log(`Produto: ${produto.nome}, Consumo: ${produto.consumoCount} vezes`);
+        });
+    }
+
+    public listarServicosMaisConsumidos(): void {
+        console.log(`\nServiços mais consumidos:`);
+
+        const servicosOrdenados = this.servicos.sort((a, b) => b.consumoCount - a.consumoCount);
+        
+        if (servicosOrdenados.length === 0) {
+            console.log("Nenhum serviço cadastrado.");
+            return;
+        }
+
+        servicosOrdenados.forEach(servico => {
+            console.log(`Serviço: ${servico.nome}, Consumo: ${servico.consumoCount} vezes`);
+        });
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\LISTAGEMPETS.TS CODE IS BELOW
+import Pet from "../modelo/pet";
+import Listagem from "./listagem";
+
+export default class ListagemPets extends Listagem {
+    private pets: Array<Pet>;
+
+    constructor(pets: Array<Pet>) {
+        super();
+        this.pets = pets;
+    }
+
+    public listar(): void {
+        console.log(`\nLista de todos os pets:`);
+
+        if (this.pets.length === 0) {
+            console.log("Nenhum pet cadastrado.");
+            return;
+        }
+
+        this.pets.forEach(pet => {
+            console.log(`Nome: ${pet.getNome}`);
+            console.log(`Raça: ${pet.getRaca}`);
+            console.log(`Gênero: ${pet.getGenero}`);
+            console.log(`Tipo: ${pet.getTipo}`);
+            console.log(`--------------------------------------`);
+        });
+        console.log(`\n`);
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\LISTAGEMPRODUTOS.TS CODE IS BELOW
+import Produto from "../modelo/produto";
+import Listagem from "./listagem";
+
+export default class ListagemProdutos extends Listagem {
+    private produtos: Array<Produto>;
+
+    constructor(produtos: Array<Produto>) {
+        super();
+        this.produtos = produtos;
+    }
+
+    public listar(): void {
+        console.log(`\nLista de todos os produtos:`);
+
+        if (this.produtos.length === 0) {
+            console.log("Nenhum produto cadastrado.");
+            return;
+        }
+
+        this.produtos.forEach(produto => {
+            console.log(`Nome: ${produto.nome}`);
+            console.log(`Preço: ${produto.preco}`);
+            console.log(`--------------------------------------`);
+        });
+        console.log(`\n`);
+    }
+}
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\SRC\NEGOCIO\REGISTROCONSUMO.TS CODE IS BELOW
+import Cliente from "../modelo/cliente";
+import Produto from "../modelo/produto";
+import Servico from "../modelo/servico";
+
+export default class RegistroConsumo {
+    private cliente: Cliente;
+
+    constructor(cliente: Cliente) {
+        this.cliente = cliente;
+    }
+
+    public registrarProduto(produto: Produto): void {
+        this.cliente.getProdutosConsumidos.push(produto);
+        produto.consumoCount++;
+        console.log(`Produto "${produto.nome}" registrado ao cliente.`);
+    }
+    
+    public registrarServico(servico: Servico): void {
+        this.cliente.getServicosConsumidos.push(servico);
+        servico.consumoCount++;
+        console.log(`Serviço "${servico.nome}" registrado ao cliente.`);
+    }
+}
+
+
+C:\USERS\BIEL_\LISTA_TECNICAS_DSM2\ATV2\TSCONFIG.JSON CODE IS BELOW
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": false,
+    "jsx": "react-jsx",
+    "outDir": "./out"
+  },
+  "include": [
+    "src"
+  ]
+}
+
