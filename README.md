@@ -5,7 +5,7 @@
 Clone o repositório para sua máquina local:
 
 
-git clone https://github.com/usuario/repo-cliente-cadastro.git
+git clone
 cd repo-cliente-cadastro
 
 ### Existem 4 branchs, uma para cada atividade, basta entrar numa pasta de uma atividade, rodar "npm i" para instalar as dependencias e depois dar um "npm start".
